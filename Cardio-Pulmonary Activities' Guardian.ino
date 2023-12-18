@@ -48,27 +48,33 @@ char st_segment='N';
 void sendSensor()
 {
     Blynk.virtualWrite(V0, cloudSpO2);
+    if (cloudSpo02 < 92) {
+      Blynk.virtualWrite(V2, true);
+    }
+    else {
+      Blynk.virtualWrite(V2, false)
+    }
     switch(st_segment){
       case 'N':
     Blynk.virtualWrite(V1, "Normal");
-    Blynk.virtualWrite(V2, true);
-    Blynk.virtualWrite(V3, false);
+    Blynk.virtualWrite(V3, true);
     Blynk.virtualWrite(V4, false);
+    Blynk.virtualWrite(V5, false);
       
       break;
 
     case 'E':
     Blynk.virtualWrite(V1, "Elevation");
-    Blynk.virtualWrite(V2, false);
-    Blynk.virtualWrite(V3, true);
-    Blynk.virtualWrite(V4, false);
-      break;
-
-      case 'E':
-      Blynk.virtualWrite(V1, "Depression");
-    Blynk.virtualWrite(V2, false);
     Blynk.virtualWrite(V3, false);
     Blynk.virtualWrite(V4, true);
+    Blynk.virtualWrite(V5, false);
+      break;
+
+      case 'D':
+      Blynk.virtualWrite(V1, "Depression");
+    Blynk.virtualWrite(V3, false);
+    Blynk.virtualWrite(V4, false);
+    Blynk.virtualWrite(V5, true);
       break;
     }
     
@@ -170,8 +176,8 @@ st_segment = 'D';
       if (validSPO2 && validHeartRate && irBuffer[i] >50000){
         
         displayOled(spo2,st_segment);
-}
-}
+      }
+      }
     maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
   }
   
