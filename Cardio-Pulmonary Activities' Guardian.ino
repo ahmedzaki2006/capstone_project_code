@@ -83,34 +83,34 @@ void sendSensor()
 
 void setup()
 {
-  Serial.begin(115200); 
- Wire1.begin(SDA_2, SCL_2);
-Blynk.begin(auth, ssid, pass);
-timer.setInterval(100L, sendSensor);
+    Serial.begin(115200); 
+    Wire1.begin(SDA_2, SCL_2);
+    Blynk.begin(auth, ssid, pass);
+    timer.setInterval(100L, sendSensor);
 
-  if (!particleSensor.begin(Wire1, I2C_SPEED_FAST)) 
-  {
+    if (!particleSensor.begin(Wire1, I2C_SPEED_FAST)) 
+    {
     Serial.println(F("MAX30105 was not found. Please check wiring/power."));
     while (1);
-  }
+    }
 
 
-  byte ledBrightness = 60;
-  byte sampleAverage = 4; 
-  byte ledMode = 2; 
-  byte sampleRate = 100; 
-  int pulseWidth = 411; 
-  int adcRange = 4096; 
+    byte ledBrightness = 60;
+    byte sampleAverage = 4; 
+    byte ledMode = 2; 
+    byte sampleRate = 100; 
+    int pulseWidth = 411; 
+    int adcRange = 4096; 
 
-  particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange); //Configure sensor with these settings
+    particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange); //Configure sensor with these settings
     
     bufferLength = 100;
 
-  maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+    maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
 
-oled.begin(SSD1306_SWITCHCAPVCC, OLED_Address);
-oled.clearDisplay();
-oled.setTextSize(1);
+    oled.begin(SSD1306_SWITCHCAPVCC, OLED_Address);
+    oled.clearDisplay();
+    oled.setTextSize(1);
 
 
 
@@ -118,10 +118,10 @@ oled.setTextSize(1);
 
 void loop()
 {
-  ECGValue = analogRead(A0);
-   Blynk.run();
-  timer.run();
- for (byte i = 25; i < 100; i++)
+    ECGValue = analogRead(A0);
+    Blynk.run();
+    timer.run();
+    for (byte i = 25; i < 100; i++)
     {
       redBuffer[i - 25] = redBuffer[i];
       irBuffer[i - 25] = irBuffer[i];
@@ -131,55 +131,61 @@ void loop()
     {
       while (particleSensor.available() == false) //do we have new data?
         particleSensor.check(); //Check the sensor for new data
-      redBuffer[i] = particleSensor.getRed();
-      irBuffer[i] = particleSensor.getIR();
-      particleSensor.nextSample(); //We're finished with this sample so move to next sample
+        redBuffer[i] = particleSensor.getRed();
+        irBuffer[i] = particleSensor.getIR();
+        particleSensor.nextSample(); //We're finished with this sample so move to next sample
 
-      Serial.print(F("red="));
-      Serial.print(redBuffer[i], DEC);
-      Serial.print(F(", ir="));
-      Serial.print(irBuffer[i], DEC);
+        Serial.print(F("red="));
+        Serial.print(redBuffer[i], DEC);
+        Serial.print(F(", ir="));
+        Serial.print(irBuffer[i], DEC);
 
-       Serial.print(F(", HR="));
-      Serial.print(heartRate, DEC);
+        Serial.print(F(", HR="));
+        Serial.print(heartRate, DEC);
 
-      Serial.print(F(", HRvalid="));
-      Serial.print(validHeartRate, DEC);
+        Serial.print(F(", HRvalid="));
+        Serial.print(validHeartRate, DEC);
 
-      Serial.print(F(", SPO2="));
-      Serial.print(spo2, DEC);
+        Serial.print(F(", SPO2="));
+        Serial.print(spo2, DEC);
 
-      Serial.print(F(", SPO2Valid="));
-      Serial.println(validSPO2, DEC);
+        Serial.print(F(", SPO2Valid="));
+        Serial.println(validSPO2, DEC);
       
       
-      if (ECGValue>= 600){
-
+        if (ECGValue>= 600)
+        {
         checkST = true;
-      }
-      long current =millis();
-      if (checkST &&(current - previous >= 100)){
-if (ECGValue < 275){
-st_segment = 'D';
-}else if (ECGValue>350){
- st_segment = 'E'; 
-}else{
-  st_segment = 'N'; 
-}
-      }else{
+        }
+        long current =millis();
+        if (checkST &&(current - previous >= 100)){
+        if (ECGValue < 275)
+        {
+        st_segment = 'D';
+        }
+        else if (ECGValue>350)
+        {
+        st_segment = 'E'; 
+        }
+        else
+        {
+        st_segment = 'N'; 
+        }
+        
+        }
+        else
+        {
         previous = current;
         checkST = false;
-      }
-
-      
-      
-      if (validSPO2 && validHeartRate && irBuffer[i] >50000){
+        }
+        
+        if (validSPO2 && validHeartRate && irBuffer[i] >50000){
         
         displayOled(spo2,st_segment);
+        }
       }
+      maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
       }
-    maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
-  }
   
 void displayOled(int SpO2,char state){
   if(a>127)
@@ -188,18 +194,18 @@ void displayOled(int SpO2,char state){
     a=0;
     lasta=a;
   }
-oled.setTextColor(WHITE);
-int b=60-(ECGValue/16);
-oled.writeLine(lasta,lastb,a,b,WHITE);
-lastb=b;
-lasta=a;
-oled.writeFillRect(0,50,128,16,BLACK);
-oled.setCursor(0,50);
-oled.print("SpO2: ");
-oled.print(SpO2);
-oled.print("%     ST:");
-oled.print(state);
-oled.display();
-a+=5;
-number();
+  oled.setTextColor(WHITE);
+  int b=60-(ECGValue/16);
+  oled.writeLine(lasta,lastb,a,b,WHITE);
+  lastb=b;
+  lasta=a;
+  oled.writeFillRect(0,50,128,16,BLACK);
+  oled.setCursor(0,50);
+  oled.print("SpO2: ");
+  oled.print(SpO2);
+  oled.print("%     ST:");
+  oled.print(state);
+  oled.display();
+  a+=5;
+  number();
 }
